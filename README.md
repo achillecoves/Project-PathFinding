@@ -1,168 +1,170 @@
-🧭 Pathfinding en C (BFS)
+# 🔍 Pathfinding en C — BFS sur graphe
 
-📌 Description
+Un programme en C qui lit un graphe depuis un fichier texte, affiche ses informations et trouve le chemin le plus court entre deux nœuds via un algorithme **BFS (Breadth-First Search)**.
 
-Ce projet est une implémentation d’un algorithme de pathfinding en C utilisant le parcours en largeur (Breadth-First Search – BFS) afin de déterminer le plus court chemin entre deux nœuds dans un graphe non pondéré.
+---
 
-Le programme :
+## 📋 Présentation
 
-- Lit un fichier de configuration
-- Construit dynamiquement un graphe en mémoire
-- Identifie le nœud de départ et le nœud d’arrivée
-- Calcule le plus court chemin
-- Affiche le résultat dans le terminal
+Ce projet implémente un **moteur de graphes** en C. Il parse un fichier de configuration décrivant des nœuds et des liens, construit le graphe en mémoire, puis recherche le chemin le plus court entre un nœud de départ et un nœud d'arrivée.
 
---------------------------------------------------------------------------------------------
+---
 
-🧠 Algorithme utilisé
+## ✨ Fonctionnalités
 
-Le projet utilise l’algorithme Breadth-First Search (BFS) :
+- 📂 **Parsing de fichier** : lecture d'un fichier `.txt` structuré en sections
+- 🔗 **Construction du graphe** : ajout dynamique de nœuds et de liens bidirectionnels
+- 🚦 **Nœuds de départ / arrivée** : marquage automatique depuis le fichier
+- 🔍 **BFS** : recherche du chemin le plus court entre deux nœuds
+- 🏝️ **Nœuds isolés** : détection des nœuds sans aucun lien
+- 🧹 **Gestion mémoire** : libération complète des ressources allouées
 
-- Exploration niveau par niveau
-- Garantie du plus court chemin dans un graphe non pondéré
-- Utilisation d’une file (queue)
-- Reconstruction du chemin via un tableau parent[]
+---
 
---------------------------------------------------------------------------------------------
+## 🗂️ Structure du projet
 
-📂 Format du fichier d’entrée
+```
+projet/
+├── main.c          # Point d'entrée, affichage des résultats
+├── library.c       # Toute la logique (parsing, graphe, BFS)
+├── library.h       # Structures, enum d'erreurs, prototypes
+├── file.txt        # Exemple de fichier de graphe
+└── Makefile        # Compilation du projet
+```
 
-Le programme attend un fichier structuré avec les sections suivantes :
+---
 
-///////////////////////////////////////////////
+## 📄 Format du fichier d'entrée
 
+Le fichier `.txt` est divisé en sections identifiées par un mot-clé précédé de `#`.
+
+```
 #nodes
-
-A
-
-B
-
-C
-
-D
-
-
+3
+4
+2
+5
 #start
-
-A
-
-
+9
+6
 #end
-
-D
-
-
+7
 #links
+3-4
+4-2
+2-9
+9-6
+6-7
+```
 
-A-B
+| Section   | Description                                          |
+|-----------|------------------------------------------------------|
+| `#nodes`  | Liste des nœuds du graphe                            |
+| `#start`  | Premier nœud listé = nœud de départ                 |
+| `#end`    | Premier nœud listé = nœud d'arrivée                 |
+| `#links`  | Liens entre nœuds au format `A-B` (bidirectionnel)  |
 
-B-C
+---
 
-C-D
+## 🏗️ Architecture du code
 
-///////////////////////////////////////////////
+### Structures (`library.h`)
 
+```c
+typedef struct n {
+    char name[64];
+    struct n **links;
+    int nb_links;
+    int is_start;
+    int is_end;
+} Node;
+```
 
-🔹 Sections
+### Codes d'erreur
 
-#nodes → liste des nœuds
+| Code | Valeur | Description              |
+|------|--------|--------------------------|
+| `FILE_NOT_FOUND`   | 1 | Fichier introuvable      |
+| `NO_START_NODE`    | 2 | Section `#start` absente |
+| `NO_END_NODE`      | 3 | Section `#end` absente   |
+| `BAD_FILE_FORMAT`  | 4 | Format de fichier invalide |
 
-#start → nœud de départ
+### Fonctions principales (`library.c`)
 
-#end → nœud d’arrivée
+| Fonction              | Rôle                                              |
+|-----------------------|---------------------------------------------------|
+| `init_node()`         | Parse le fichier et construit le graphe           |
+| `shortest_path()`     | Lance le BFS et affiche le chemin trouvé          |
+| `bfs_while()`         | Itération interne du BFS                          |
+| `get_unconnected_node()` | Retourne les nœuds sans liens                 |
+| `add_node()`          | Ajoute un nœud s'il n'existe pas encore           |
+| `add_links_from_buffer()` | Crée un lien bidirectionnel entre deux nœuds |
+| `free_nodes()`        | Libère toute la mémoire allouée                   |
 
-#links → connexions bidirectionnelles sous la forme A-B
+---
 
---------------------------------------------------------------------------------------------
+## ⚙️ Compilation
 
-⚙️ Compilation
+### Prérequis
 
-gcc -Wall -Wextra -Werror main.c library.c -o pathfinding
+- GCC
+- Make
 
+### Avec le Makefile
 
-(Adapter selon l’organisation de vos fichiers.)
+```bash
+make        # Compile le projet -> exécutable "main"
+make clean  # Supprime l'exécutable
+make re     # Recompile depuis zéro
+```
 
---------------------------------------------------------------------------------------------
+### Manuellement
 
-▶️ Exécution
+```bash
+gcc -Wall -g -lm main.c library.c -o main
+```
 
-./pathfinding fichier.txt
+---
 
---------------------------------------------------------------------------------------------
+## 🚀 Utilisation
 
-📤 Exemple de sortie
+```bash
+./main
+```
+
+> Le fichier d'entrée est défini dans `main.c` via la variable `filename`. Modifiez-la pour pointer vers votre propre fichier.
+
+### Exemple de sortie
+
+Avec le fichier `file.txt` fourni :
+
+```
+nodes: 7
+links: 5
+start: 9
+end: 7
+unconnected nodes :
+3
 
 pathfinding:
+9 6 7
+```
 
-A B C D
+---
 
+## 🛠️ Technologies utilisées
 
-Si aucun chemin n’est trouvé :
+| Élément       | Détail                          |
+|---------------|---------------------------------|
+| Langage       | C (C99)                         |
+| Compilation   | GCC avec `-Wall -g -lm`         |
+| Algorithme    | BFS (Breadth-First Search)      |
+| Mémoire       | Allocation dynamique (`malloc`, `realloc`) |
 
-No path
+---
 
---------------------------------------------------------------------------------------------
+## 👨‍💻 Auteur
 
+Projet réalisé dans le cadre d'un cours algorithmique / structures de données en C.
 
-🏗️ Architecture du projet
-
-
-🔹 Construction du graphe
-
-- Allocation dynamique des nœuds
-- Stockage des connexions via listes d’adjacence
-- Gestion mémoire complète (malloc, realloc, free)
-
-
-🔹 Fonctions principales
-
-init_node() → Lecture et création du graphe
-
-add_node() → Ajout dynamique d’un nœud
-
-add_links_from_buffer() → Création des connexions
-
-shortest_path() → Calcul du plus court chemin
-
-bfs_while() → Étape principale du BFS
-
-free_nodes() → Libération mémoire
-
---------------------------------------------------------------------------------------------
-
-🧹 Gestion mémoire
-
-Le projet :
-
-- Alloue dynamiquement les nœuds
-- Alloue dynamiquement les tableaux de liens
-- Libère proprement toute la mémoire à la fin
-- Compatible avec valgrind.
-
---------------------------------------------------------------------------------------------  
-
-🚀 Points techniques
-
-- Manipulation avancée de pointeurs triples (Node ***)
-- Reallocation dynamique progressive
-- Parsing manuel de fichier
-- Reconstruction de chemin via tableau parent[]
-- Gestion d’erreurs personnalisée
-
---------------------------------------------------------------------------------------------
-
-📚 Concepts abordés
-
-- Structures en C
-- Listes d’adjacence
-- Allocation dynamique
-- Lecture de fichier
-- Algorithme BFS
-- Gestion d’erreurs
-- Manipulation de chaînes (trim, strcmp, sscanf)
-
---------------------------------------------------------------------------------------------
-
-👨‍💻 Auteur
-
-Projet réalisé dans le cadre d’un apprentissage du langage C et des algorithmes de graphes.
+Achille Coves.
